@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Konsumsi extends Model
+{
+    use HasFactory;
+
+    protected $table = 'konsumsis';
+
+    protected $fillable = [
+        'kegiatan_id',
+        'kategori',
+        'waktu_konsumsi_id',
+        'nama_konsumsi',
+        'jumlah',
+        'harga',
+        'tanggal_pembelian',
+    ];
+
+    protected $casts = [
+        'tanggal_pembelian' => 'datetime',
+    ];
+
+    public function kegiatan()
+    {
+        return $this->belongsTo(Kegiatan::class, 'kegiatan_id');
+    }
+
+    public function waktuKonsumsi()
+    {
+        return $this->belongsTo(WaktuKonsumsi::class, 'waktu_konsumsi_id');
+    }
+
+    // Accessor untuk subtotal (Porsi x Harga)
+    public function getSubtotalAttribute()
+    {
+        return $this->jumlah * $this->harga;
+    }
+}
