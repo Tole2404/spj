@@ -71,7 +71,7 @@ class BreadcrumbHelper
                     'create' => 'Tambah Kegiatan',
                     'edit' => 'Edit Kegiatan',
                     'show' => 'Detail Kegiatan',
-                    'pilih-detail' => 'Pilih Detail',
+                    'pilih-detail' => 'Detail Belanja Bahan',
                 ];
                 if (isset($actions[$segments[1]])) {
                     $breadcrumbs[] = [
