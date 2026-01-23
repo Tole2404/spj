@@ -238,6 +238,11 @@
     <!-- Main Content -->
     <div class="pt-28 px-6 lg:px-12 pb-8">
         <div class="container max-w-6xl mx-auto">
+            <!-- Breadcrumbs -->
+            @if(isset($breadcrumbs) && count($breadcrumbs) > 0)
+                <x-breadcrumbs :items="$breadcrumbs" />
+            @endif
+
             <!-- Page Header -->
             <div class="mb-6">
                 <h1 class="text-3xl font-bold text-primary">
