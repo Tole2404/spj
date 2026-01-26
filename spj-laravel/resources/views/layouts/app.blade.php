@@ -99,6 +99,8 @@
             font-weight: 600;
             white-space: nowrap;
         }
+
+
     </style>
 
     @stack('styles')
@@ -276,7 +278,7 @@
         <div class="container max-w-6xl mx-auto px-6 lg:px-12 py-6">
             <div class="text-center">
                 <p class="text-sm text-gray-600">
-                    &copy; {{ date('Y') }} Kementerian Pekerjaan Umum dan Perumahan Rakyat
+                    &copy; {{ date('Y') }} Kementerian Pekerjaan Umum
                 </p>
                 <p class="text-xs text-gray-500 mt-1">
                     Sistem Pengelolaan Keuangan & Belanja
