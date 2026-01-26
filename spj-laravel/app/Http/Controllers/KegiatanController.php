@@ -102,11 +102,14 @@ class KegiatanController extends Controller
         $kegiatan = Kegiatan::with(['unor', 'unitKerja'])->findOrFail($id);
 
         // Get konsumsi grouped by kategori
+        // Exclude draft items from the detail view
         $snacks = \App\Models\Konsumsi::where('kegiatan_id', $id)
             ->where('kategori', 'snack')
+            ->where('status', '!=', 'draft')
             ->get();
         $makanans = \App\Models\Konsumsi::where('kegiatan_id', $id)
             ->where('kategori', 'makanan')
+            ->where('status', '!=', 'draft')
             ->get();
 
         // Get narasumber

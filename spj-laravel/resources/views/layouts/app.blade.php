@@ -126,7 +126,7 @@
                         <div class="w-7 h-7 bg-white rounded flex items-center justify-center">
                             <span class="text-primary font-bold text-sm">S</span>
                         </div>
-                        <span class="text-white font-bold text-lg">SPJ Laravel</span>
+                        <span class="text-white font-bold text-lg">SPJ</span>
                     </a>
 
                     <!-- User Info -->
@@ -228,10 +228,10 @@
                     </div>
 
                     <!-- Laporan -->
-                    <a href="#"
+                    {{-- <a href="#"
                         class="flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-primary transition-colors">
                         Laporan
-                    </a>
+                    </a> --}}
                 </div>
             </div>
         </div>
