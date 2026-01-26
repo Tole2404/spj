@@ -208,4 +208,18 @@ class KonsumsiController extends Controller
         return redirect()->route('konsumsi.validasi', $konsumsi->id)
             ->with('success', 'Data konsumsi berhasil dikoreksi! Silakan validasi ulang.');
     }
+
+    /**
+     * Remove the specified konsumsi from storage.
+     */
+    public function destroy($id)
+    {
+        $konsumsi = Konsumsi::findOrFail($id);
+        $kegiatan_id = $konsumsi->kegiatan_id;
+
+        $konsumsi->delete();
+
+        return redirect()->route('kegiatan.pilih-detail', $kegiatan_id)
+            ->with('success', 'Item konsumsi berhasil dihapus!');
+    }
 }
