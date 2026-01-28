@@ -16,7 +16,7 @@ class KwitansiController extends Controller
         $kegiatanId = $request->get('kegiatan_id');
         $jenis = $request->get('jenis', 'UP'); // UP or LS
 
-        $kegiatan = Kegiatan::with(['unor', 'unitKerja', 'mak', 'ppk'])->findOrFail($kegiatanId);
+        $kegiatan = Kegiatan::with(['unor', 'unitKerja', 'mak', 'ppk', 'bendahara'])->findOrFail($kegiatanId);
 
         // Get konsumsi data
         $konsumsis = Konsumsi::where('kegiatan_id', $kegiatanId)->get();
@@ -24,6 +24,10 @@ class KwitansiController extends Controller
 
         // Generate terbilang
         $terbilang = $this->terbilang($totalKonsumsi);
+
+        if ($jenis === 'LS') {
+            return view('kwitansi.preview-ls', compact('kegiatan', 'konsumsis', 'totalKonsumsi', 'terbilang', 'jenis'));
+        }
 
         return view('kwitansi.preview', compact('kegiatan', 'konsumsis', 'totalKonsumsi', 'terbilang', 'jenis'));
     }

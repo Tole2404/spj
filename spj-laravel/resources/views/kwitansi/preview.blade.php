@@ -9,197 +9,248 @@
     <style>
         @media print {
             body {
-                print-color-adjust: exact;
                 -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
 
             .no-print {
                 display: none !important;
             }
 
-            .page-break {
-                page-break-after: always;
+            @page {
+                size: A4;
+                margin: 0;
             }
         }
 
-        @page {
-            size: A4;
-            margin: 15mm;
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10pt;
+            line-height: 1.3;
+            background-color: #f3f4f6;
+        }
+
+        .sheet {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 1.27cm 15mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        @media print {
+            .sheet {
+                width: 100%;
+                height: 100%;
+                box-shadow: none;
+                margin: 0;
+                padding: 1.27cm 15mm;
+            }
+
+            body {
+                background-color: white;
+            }
+        }
+
+        /* Border box wrapper for the entire content */
+        .main-box {
+            border: 1.5px solid black;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .border-top-black {
+            border-top: 1.5px solid black;
+        }
+
+        td {
+            vertical-align: top;
+            padding-bottom: 4px;
         }
     </style>
 </head>
 
-<body class="bg-gray-100">
+<body class="text-black">
     <!-- Action Bar (Hidden when printing) -->
     <div class="no-print fixed top-0 left-0 right-0 bg-white border-b border-gray-200 shadow-sm z-50">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="max-w-4xl mx-auto px-4 py-2 flex items-center justify-between">
             <a href="{{ route('kegiatan.pilih-detail', $kegiatan->id) }}"
                 class="text-gray-600 hover:text-gray-900 text-sm flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Kembali
+                &larr; Kembali
             </a>
-            <button onclick="window.print()"
-                class="px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 transition flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
-                Cetak / Print
-            </button>
+            <div class="flex gap-2">
+                <a href="{{ route('kwitansi.download', ['kegiatan_id' => $kegiatan->id, 'jenis' => $jenis]) }}"
+                    class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700">
+                    Download PDF
+                </a>
+                <button onclick="window.print()"
+                    class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded hover:bg-gray-900">
+                    Cetak
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Kuitansi Content -->
-    <div class="max-w-4xl mx-auto pt-20 pb-8 px-4 no-print:pt-20">
-        <div
-            class="bg-white p-8 rounded-lg shadow-sm border border-gray-200 print:shadow-none print:border-0 print:p-0">
+    <!-- Spacer -->
+    <div class="h-16 no-print"></div>
 
-            <!-- Header -->
-            <div class="text-center mb-6">
-                <h1 class="text-xl font-bold text-gray-900">KUITANSI {{ $jenis }}</h1>
-                <p class="text-sm text-gray-600 mt-1">BUKTI PEMBAYARAN</p>
-            </div>
+    <div class="sheet">
 
-            <!-- Info Header -->
-            <div class="grid grid-cols-3 gap-4 mb-6 text-sm">
-                <div>
-                    <span class="text-gray-500">Tahun Anggaran</span>
-                    <p class="font-medium">{{ date('Y') }}</p>
-                </div>
-                <div>
-                    <span class="text-gray-500">No. Bukti</span>
-                    <p class="font-medium">
-                        {{ str_pad($kegiatan->id, 5, '0', STR_PAD_LEFT) }}/{{ $jenis }}/{{ date('Y') }}</p>
-                </div>
-                <div>
-                    <span class="text-gray-500">Tanggal</span>
-                    <p class="font-medium">{{ now()->format('d F Y') }}</p>
-                </div>
-            </div>
+        <!-- Main Content Box (One Big Border) -->
+        <div class="main-box">
 
-            <hr class="my-4 border-gray-300">
+            <!-- Upper Content Section (Header + Body) -->
+            <div class="p-6 pb-2 flex-grow">
 
-            <!-- Administrative Info -->
-            <div class="grid grid-cols-2 gap-4 mb-4 text-sm bg-gray-50 p-3 rounded print:bg-gray-100">
-                @if($kegiatan->ppk)
-                    <div>
-                        <span class="text-gray-500 text-xs">Nama Satker:</span>
-                        <p class="font-medium">{{ $kegiatan->ppk->satker }}</p>
+                <!-- Header (Inside Box) -->
+                <div class="flex justify-between items-start mb-6">
+                    <!-- Left: Logo -->
+                    <div class="pt-2">
+                        <span class="text-green-700 font-bold italic text-lg">
+                            <img src="{{ asset('images/logo_kementerian.png') }}" class="h-16"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'">
+                            <span style="display:none">qrsimbpk</span>
+                        </span>
                     </div>
-                @endif
-                @if($kegiatan->mak)
-                    <div>
-                        <span class="text-gray-500 text-xs">Nomor MAK:</span>
-                        <p class="font-mono text-xs font-medium">{{ $kegiatan->mak->kode }}</p>
+
+                    <!-- Right: Meta Data -->
+                    <div class="text-sm font-bold w-[60%]">
+                        <div class="mb-2 uppercase text-left">KUITANSI {{ $jenis }}</div>
+                        <table class="w-full">
+                            <tr>
+                                <td class="w-32">Tahun Anggaran</td>
+                                <td class="w-2">:</td>
+                                <td>{{ date('Y') }}</td>
+                            </tr>
+                            <tr>
+                                <td>No. Bukti</td>
+                                <td>:</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>MAK</td>
+                                <td>:</td>
+                                <td>{{ $kegiatan->mak->kode ?? '-' }}</td>
+                            </tr>
+                            <tr>
+                                <td>Akun</td>
+                                <td>:</td>
+                                <td>524113</td>
+                            </tr>
+                        </table>
                     </div>
-                @endif
+                </div>
+
+                <!-- Title -->
+                <div class="text-center mb-10">
+                    <h1 class="text-xl font-bold uppercase">KUITANSI / BUKTI PEMBAYARAN</h1>
+                </div>
+
+                <!-- Table Content -->
+                <table class="w-full text-[10.5pt] mb-8">
+                    <tr>
+                        <td class="w-40 py-1">Sudah terima dari</td>
+                        <td class="w-4 py-1">:</td>
+                        <td class="py-1">
+                            Pejabat Pembuat Komitmen Satuan Kerja<br>
+                            {{ $kegiatan->unitKerja->nama_unit ?? 'Sekretariat Badan Pengembangan Sumber Daya Manusia' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="py-1">Uang sebesar</td>
+                        <td class="py-1">:</td>
+                        <td class="py-1 font-bold">
+                            Rp. {{ number_format($totalKonsumsi, 0, ',', '.') }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="py-1">Terbilang</td>
+                        <td class="py-1">:</td>
+                        <td class="py-1 font-bold bg-gray-100 print:bg-transparent capitalize">
+                            {{ ucwords(trim($terbilang)) }} rupiah
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="py-1">Untuk Pembayaran</td>
+                        <td class="py-1">:</td>
+                        <td class="py-1 text-justify leading-snug">
+                            {{ $kegiatan->uraian_kegiatan ?? ('Himpunan perjalanan dinas dalam rangka ' . $kegiatan->nama_kegiatan) }}
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Middle Signatures -->
+                <div class="flex justify-between mt-12 mb-8 px-4">
+                    <!-- Left: Mengetahui -->
+                    <div class="text-center w-1/2">
+                        <p class="mb-20 leading-tight">
+                            Yang Mengetahui,<br>
+                            {{ $kegiatan->ppk->jabatan ?? 'Pejabat Pembuat Komitmen, Bagian Hukum, Kerja Sama, Komunikasi Publik' }}
+                        </p>
+                        <div class="mt-4">
+                            <p class="font-bold underline">{{ $kegiatan->ppk->nama ?? '..........................' }}
+                            </p>
+                            <p>{{ $kegiatan->ppk->nip ?? '' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Right: Menerima -->
+                    <div class="text-center w-1/2">
+                        <p class="mb-1">Jakarta, {{ now()->translatedFormat('d F Y') }}</p>
+                        <p class="mb-20 leading-tight">
+                            Yang Menerima,<br>
+                            <span class="font-bold">Pembuat Daftar</span>
+                        </p>
+                        <div class="mt-4">
+                            <p class="font-bold underline">{{ auth()->user()->name ?? '..........................' }}
+                            </p>
+                            <p>{{ auth()->user()->nip ?? 'NIP: ..........................' }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Content -->
-            <table class="w-full text-sm mb-6">
-                <tr>
-                    <td class="py-2 w-40 align-top text-gray-600">Sudah terima dari</td>
-                    <td class="py-2 font-medium">: Pejabat Pembuat Komitmen
-                        @if($kegiatan->ppk)
-                            <br>&nbsp;&nbsp;{{ $kegiatan->ppk->nama }}
-                            <br>&nbsp;&nbsp;NIP. {{ $kegiatan->ppk->nip }}
-                        @else
-                            Satuan Kerja {{ $kegiatan->unitKerja->nama_unit ?? '-' }}
-                        @endif
-                    </td>
-                </tr>
-                <tr>
-                    <td class="py-2 align-top text-gray-600">Uang sebesar</td>
-                    <td class="py-2 font-bold text-teal-600">: Rp {{ number_format($totalKonsumsi, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <td class="py-2 align-top text-gray-600">Terbilang</td>
-                    <td class="py-2 font-medium italic">: {{ ucwords(trim($terbilang)) }} rupiah</td>
-                </tr>
-                <tr>
-                    <td class="py-2 align-top text-gray-600">Untuk Pembayaran</td>
-                    <td class="py-2">:
-                        @if($kegiatan->mak)
-                            {{ $kegiatan->mak->nama }}<br>
-                            &nbsp;&nbsp;<span class="text-xs text-gray-500">Kegiatan: {{ $kegiatan->nama_kegiatan }}</span>
-                        @else
-                            Konsumsi dalam rangka {{ $kegiatan->nama_kegiatan }}
-                        @endif
-                    </td>
-                </tr>
-            </table>
-
-            <!-- Detail Konsumsi -->
-            @if($konsumsis->count() > 0)
-                <div class="mb-6">
-                    <h3 class="text-xs font-semibold text-gray-500 uppercase mb-2">Rincian Konsumsi</h3>
-                    <table class="w-full text-sm border border-gray-300">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-600 border-b border-gray-300">
-                                    Item</th>
-                                <th
-                                    class="px-3 py-2 text-center text-xs font-medium text-gray-600 border-b border-gray-300 w-16">
-                                    Qty</th>
-                                <th
-                                    class="px-3 py-2 text-right text-xs font-medium text-gray-600 border-b border-gray-300 w-24">
-                                    Harga</th>
-                                <th
-                                    class="px-3 py-2 text-right text-xs font-medium text-gray-600 border-b border-gray-300 w-28">
-                                    Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($konsumsis as $item)
-                                <tr>
-                                    <td class="px-3 py-2 border-b border-gray-200">{{ $item->nama_konsumsi }} <span
-                                            class="text-xs text-gray-400">({{ $item->kategori }})</span></td>
-                                    <td class="px-3 py-2 text-center border-b border-gray-200">{{ $item->jumlah }}</td>
-                                    <td class="px-3 py-2 text-right border-b border-gray-200">Rp
-                                        {{ number_format($item->harga, 0, ',', '.') }}</td>
-                                    <td class="px-3 py-2 text-right border-b border-gray-200 font-medium">Rp
-                                        {{ number_format($item->subtotal, 0, ',', '.') }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                        <tfoot class="bg-gray-50">
-                            <tr>
-                                <td colspan="3" class="px-3 py-2 text-right font-semibold border-t border-gray-300">Total:
-                                </td>
-                                <td class="px-3 py-2 text-right font-bold text-teal-600 border-t border-gray-300">Rp
-                                    {{ number_format($totalKonsumsi, 0, ',', '.') }}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+            <!-- Footer Section (Separated by Border Top) -->
+            <div class="border-top-black relative p-6 pt-4 text-[10pt]">
+                <!-- Top Right Date -->
+                <div class="absolute top-1 right-6 text-sm">
+                    Lunas dibayar Tgl {{ now()->translatedFormat('d F Y') }}
                 </div>
-            @endif
 
-            <!-- Signatures -->
-            <div class="grid grid-cols-2 gap-8 mt-8 text-sm text-center">
-                <div>
-                    <p class="text-gray-600 mb-16">Yang Mengetahui,</p>
-                    <p class="font-medium">Kepala {{ $kegiatan->unitKerja->nama_unit ?? 'Unit Kerja' }}</p>
-                    <p class="text-gray-500 mt-1">{{ $kegiatan->unor->nama_unor ?? '-' }}</p>
-                </div>
-                <div>
-                    <p class="text-gray-600">Jakarta, {{ now()->format('d F Y') }}</p>
-                    <p class="mb-16">Yang Menerima,</p>
-                    <p class="font-medium">Pembuat Daftar</p>
+                <div class="flex justify-between mt-8">
+                    <!-- Left Footer -->
+                    <div class="text-center w-1/2">
+                        <p class="mb-20 leading-tight">
+                            Setuju dibebankan pada mata anggaran<br>berkenan,<br>
+                            an. Kuasa Pengguna Anggaran<br>
+                            Pejabat Pembuat Komitmen
+                        </p>
+                        <div>
+                            <p class="font-bold underline">{{ $kegiatan->ppk->nama ?? '.....................' }}</p>
+                            <p>{{ $kegiatan->ppk->nip ?? '' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Right Footer -->
+                    <div class="text-center w-1/2 flex flex-col justify-end">
+                        <p class="mb-20 leading-tight">
+                            Bendahara Pengeluaran
+                        </p>
+                        <div>
+                            <p class="font-bold underline">{{ $kegiatan->bendahara->nama ?? '.....................' }}
+                            </p>
+                            <p>{{ $kegiatan->bendahara->nip ?? '' }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
         </div>
     </div>
-
-    <script>
-        // Auto open print dialog
-        window.onload = function () {
-            window.print();
-        }
-    </script>
 </body>
 
 </html>
