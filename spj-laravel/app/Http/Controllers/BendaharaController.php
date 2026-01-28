@@ -10,9 +10,26 @@ class BendaharaController extends Controller
     /**
      * Display a listing of bendahara.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $bendaharas = Bendahara::orderBy('nama')->get();
+        $query = Bendahara::query();
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('nip', 'like', "%{$search}%")
+                    ->orWhere('jabatan', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter status
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status == 'aktif');
+        }
+
+        $bendaharas = $query->orderBy('nama')->paginate(10)->withQueryString();
         return view('master.bendahara.index', compact('bendaharas'));
     }
 

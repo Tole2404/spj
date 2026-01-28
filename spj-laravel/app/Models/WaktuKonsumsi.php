@@ -13,6 +13,7 @@ class WaktuKonsumsi extends Model
 
     protected $fillable = [
         'nama_waktu',
+        'tipe',
         'kode_waktu',
     ];
 

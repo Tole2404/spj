@@ -14,9 +14,9 @@
                 extend: {
                     colors: {
                         primary: {
-                            DEFAULT: '#14b8a6',
-                            dark: '#0f766e',
-                            light: '#2dd4bf',
+                            DEFAULT: 'var(--color-primary)',
+                            dark: 'var(--color-primary-dark)',
+                            light: 'var(--color-primary-light)',
                         }
                     }
                 }
@@ -59,6 +59,7 @@
             from {
                 opacity: 0;
             }
+
             to {
                 opacity: 1;
             }
@@ -78,7 +79,7 @@
             width: 100%;
             height: 100%;
             border: 4px solid #f3f4f6;
-            border-top-color: #14b8a6;
+            border-top-color: var(--color-primary);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -95,12 +96,10 @@
             left: 50%;
             transform: translate(-50%, 50%);
             margin-top: 20px;
-            color: #14b8a6;
+            color: var(--color-primary);
             font-weight: 600;
             white-space: nowrap;
         }
-
-
     </style>
 
     @stack('styles')
@@ -117,9 +116,9 @@
 
     <!-- Navbar -->
     <nav class="fixed top-0 left-0 right-0 bg-primary z-50">
-        <!-- Top Bar: Brand + User -->
+        <!-- Top Bar: Brand + Hamburger + User -->
         <div class="border-b border-teal-600">
-            <div class="container mx-auto px-6 lg:px-12">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-12">
                 <div class="flex items-center justify-between h-14">
                     <!-- Brand -->
                     <a href="{{ route('home') }}" class="flex items-center space-x-2">
@@ -129,30 +128,51 @@
                         <span class="text-white font-bold text-lg">SPJ</span>
                     </a>
 
-                    <!-- User Info -->
+                    <!-- User Info + Hamburger -->
                     @auth
-                        <div class="flex items-center space-x-4">
-                            <div class="text-right hidden md:block">
-                                <div class="text-white text-sm font-medium">{{ Auth::user()->name }}</div>
-                                <div class="text-teal-200 text-xs">{{ ucfirst(Auth::user()->role) }}</div>
+                        <div class="flex items-center space-x-3 sm:space-x-4">
+                            <!-- User Avatar & Name (hidden on very small screens) -->
+                            <div class="hidden sm:flex items-center space-x-3">
+                                <div class="text-right hidden md:block">
+                                    <div class="text-white text-sm font-medium">{{ Auth::user()->name }}</div>
+                                    <div class="text-teal-200 text-xs">{{ ucfirst(Auth::user()->role) }}</div>
+                                </div>
+                                <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center">
+                                    <span
+                                        class="text-primary font-bold text-sm">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                                </div>
                             </div>
-                            <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center">
-                                <span class="text-primary font-bold text-sm">{{ substr(Auth::user()->name, 0, 1) }}</span>
-                            </div>
+
+                            <!-- Logout (always visible) -->
                             <form action="{{ route('logout') }}" method="POST" class="inline" data-no-loader>
                                 @csrf
                                 <button type="submit" class="text-white hover:text-teal-200 transition text-sm">
                                     Logout
                                 </button>
                             </form>
+
+                            <!-- Hamburger Button (mobile only) -->
+                            <button type="button" id="hamburgerBtn"
+                                class="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition">
+                                <svg id="hamburgerIcon" class="w-6 h-6" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 6h16M4 12h16M4 18h16"></path>
+                                </svg>
+                                <svg id="closeIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
                         </div>
                     @endauth
                 </div>
             </div>
         </div>
 
-        <!-- Menu Bar -->
-        <div class="bg-white border-b border-gray-200">
+        <!-- Desktop Menu Bar (hidden on mobile) -->
+        <div class="hidden md:block bg-white border-b border-gray-200">
             <div class="container mx-auto px-6 lg:px-12">
                 <div class="flex items-center justify-center space-x-6 h-12">
                     <!-- Dashboard -->
@@ -199,7 +219,7 @@
                                 <a href="{{ route('master.sbm-konsumsi.index') }}"
                                     class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary">SBM
                                     Konsumsi</a>
-                                <a href="{{ route('master.sbm-honorarium') }}"
+                                <a href="{{ route('master.sbm-honorarium.index') }}"
                                     class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary rounded-b-lg">SBM
                                     Honorarium</a>
                             </div>
@@ -226,19 +246,67 @@
                                 Kegiatan</a>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
 
-                    <!-- Laporan -->
-                    {{-- <a href="#"
-                        class="flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-primary transition-colors">
-                        Laporan
-                    </a> --}}
+        <!-- Mobile Menu (hidden by default) -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-b border-gray-200 max-h-[70vh] overflow-y-auto">
+            <div class="py-2">
+                <!-- Dashboard -->
+                <a href="{{ route('home') }}"
+                    class="block px-4 py-3 text-sm font-medium {{ request()->routeIs('home') ? 'text-primary bg-primary/5 border-l-4 border-primary' : 'text-gray-700 hover:bg-gray-50' }}">
+                    Dashboard
+                </a>
+
+                <!-- Master Section (Admin only) -->
+                @if(Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']))
+                    <div class="border-t border-gray-100 mt-2 pt-2">
+                        <div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase">Master Data</div>
+                        <a href="{{ route('master.unor.index') }}"
+                            class="block px-4 py-2.5 text-sm {{ request()->routeIs('master.unor.*') ? 'text-primary bg-primary/5' : 'text-gray-700 hover:bg-gray-50' }}">Unit
+                            Organisasi</a>
+                        <a href="{{ route('master.unit-kerja.index') }}"
+                            class="block px-4 py-2.5 text-sm {{ request()->routeIs('master.unit-kerja.*') ? 'text-primary bg-primary/5' : 'text-gray-700 hover:bg-gray-50' }}">Unit
+                            Kerja</a>
+                        <a href="{{ route('master.waktu-konsumsi.index') }}"
+                            class="block px-4 py-2.5 text-sm {{ request()->routeIs('master.waktu-konsumsi.*') ? 'text-primary bg-primary/5' : 'text-gray-700 hover:bg-gray-50' }}">Waktu
+                            Konsumsi</a>
+                        <a href="{{ route('master.mak.index') }}"
+                            class="block px-4 py-2.5 text-sm {{ request()->routeIs('master.mak.*') ? 'text-primary bg-primary/5' : 'text-gray-700 hover:bg-gray-50' }}">MAK
+                            (Akun)</a>
+                        <a href="{{ route('master.ppk.index') }}"
+                            class="block px-4 py-2.5 text-sm {{ request()->routeIs('master.ppk.*') ? 'text-primary bg-primary/5' : 'text-gray-700 hover:bg-gray-50' }}">PPK</a>
+                        <a href="{{ route('master.bendahara.index') }}"
+                            class="block px-4 py-2.5 text-sm {{ request()->routeIs('master.bendahara.*') ? 'text-primary bg-primary/5' : 'text-gray-700 hover:bg-gray-50' }}">Bendahara</a>
+                        <a href="{{ route('users.index') }}"
+                            class="block px-4 py-2.5 text-sm {{ request()->is('users*') ? 'text-primary bg-primary/5' : 'text-gray-700 hover:bg-gray-50' }}">User
+                            Management</a>
+                        <a href="{{ route('master.sbm-konsumsi.index') }}"
+                            class="block px-4 py-2.5 text-sm {{ request()->routeIs('master.sbm-konsumsi.*') ? 'text-primary bg-primary/5' : 'text-gray-700 hover:bg-gray-50' }}">SBM
+                            Konsumsi</a>
+                        <a href="{{ route('master.sbm-honorarium.index') }}"
+                            class="block px-4 py-2.5 text-sm {{ request()->routeIs('master.sbm-honorarium.*') ? 'text-primary bg-primary/5' : 'text-gray-700 hover:bg-gray-50' }}">SBM
+                            Honorarium</a>
+                    </div>
+                @endif
+
+                <!-- Transaksi Section -->
+                <div class="border-t border-gray-100 mt-2 pt-2">
+                    <div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase">Transaksi</div>
+                    <a href="{{ route('kegiatan.index') }}"
+                        class="block px-4 py-2.5 text-sm {{ request()->routeIs('kegiatan.index') ? 'text-primary bg-primary/5' : 'text-gray-700 hover:bg-gray-50' }}">Daftar
+                        Kegiatan</a>
+                    <a href="{{ route('kegiatan.create') }}"
+                        class="block px-4 py-2.5 text-sm {{ request()->routeIs('kegiatan.create') ? 'text-primary bg-primary/5' : 'text-gray-700 hover:bg-gray-50' }}">Tambah
+                        Kegiatan</a>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <div class="pt-28 px-6 lg:px-12 pb-8">
+    <div class="pt-16 md:pt-28 px-4 sm:px-6 lg:px-12 pb-8">
         <div class="container max-w-6xl mx-auto">
             <!-- Breadcrumbs -->
             @if(isset($breadcrumbs) && count($breadcrumbs) > 0)
@@ -290,64 +358,49 @@
     @stack('scripts')
 
     <script>
-        // Show loading spinner when navigating to a new page
+        // Page loader - only for form submissions
         const pageLoader = document.getElementById('pageLoader');
 
-        // Show loader on initial page load (quickly) to indicate loading
-        document.addEventListener('DOMContentLoaded', function() {
-            pageLoader.classList.add('active');
-        });
-
-        // Also show loader when the browser is about to unload the page
-        // This catches navigations that don't always trigger click handlers (e.g., programmatic or anchor navigation)
-        window.addEventListener('beforeunload', function() {
-            try {
-                pageLoader.classList.add('active');
-            } catch (e) {}
-        });
-
-        // Show loader on link clicks (internal links only)
-        document.addEventListener('click', function(event) {
-            const target = event.target.closest('a');
-            if (!target) return;
-
-            // Skip if developer marked link to skip loader
-            if (target.hasAttribute('data-no-loader')) return;
-
-            // skip javascript: links and anchors
-            const href = target.getAttribute('href') || '';
-            if (href.startsWith('javascript:') || href.startsWith('#')) return;
-
-            // Only show for same-origin navigations without target (open in same tab)
-            try {
-                const url = new URL(href, window.location.href);
-                if (url.origin === window.location.origin && !target.target) {
-                    pageLoader.classList.add('active');
-                }
-            } catch (e) {
-                // ignore malformed URLs
-            }
-        });
-
         // Show loader on form submissions (unless marked to skip)
-        document.addEventListener('submit', function(event) {
+        document.addEventListener('submit', function (event) {
             const form = event.target;
             if (!form.hasAttribute('data-no-loader')) {
                 pageLoader.classList.add('active');
             }
         });
 
-        // Hide loader when page fully loads; keep a short delay for smoother UX
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                pageLoader.classList.remove('active');
-            }, 500);
-        });
-
-        // Also hide loader on pageshow (back/forward cache)
-        window.addEventListener('pageshow', function() {
+        // Hide loader when page loads
+        window.addEventListener('load', function () {
             pageLoader.classList.remove('active');
         });
+
+        // Also hide on pageshow (back/forward cache)
+        window.addEventListener('pageshow', function () {
+            pageLoader.classList.remove('active');
+        });
+
+        // Hamburger Menu Toggle
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const hamburgerIcon = document.getElementById('hamburgerIcon');
+        const closeIcon = document.getElementById('closeIcon');
+
+        if (hamburgerBtn && mobileMenu) {
+            hamburgerBtn.addEventListener('click', function () {
+                mobileMenu.classList.toggle('hidden');
+                hamburgerIcon.classList.toggle('hidden');
+                closeIcon.classList.toggle('hidden');
+            });
+
+            // Close menu when clicking on a link
+            mobileMenu.querySelectorAll('a').forEach(function (link) {
+                link.addEventListener('click', function () {
+                    mobileMenu.classList.add('hidden');
+                    hamburgerIcon.classList.remove('hidden');
+                    closeIcon.classList.add('hidden');
+                });
+            });
+        }
     </script>
 
     @stack('scripts')

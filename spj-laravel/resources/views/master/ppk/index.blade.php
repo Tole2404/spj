@@ -15,7 +15,7 @@
 
         <!-- Search & Filter Card -->
         <div class="bg-white rounded-lg border border-gray-200 p-4">
-            <form method="GET" action="{{ route('master.ppk.index') }}" class="flex items-end gap-3">
+            <form method="GET" action="{{ route('master.ppk.index') }}" class="flex flex-col md:flex-row md:items-end gap-3">
                 <!-- Search -->
                 <div class="flex-1">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Pencarian</label>
@@ -25,17 +25,19 @@
                 </div>
 
                 <!-- Actions -->
-                <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition">
-                    Cari
-                </button>
-                <a href="{{ route('master.ppk.index') }}"
-                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
-                    Reset
-                </a>
-                <a href="{{ route('master.ppk.create') }}"
-                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-                    + Tambah PPK
-                </a>
+                <div class="flex flex-wrap gap-2">
+                    <button type="submit" class="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark transition">
+                        Cari
+                    </button>
+                    <a href="{{ route('master.ppk.index') }}"
+                        class="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-center">
+                        Reset
+                    </a>
+                    <a href="{{ route('master.ppk.create') }}"
+                        class="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-center">
+                        + Tambah
+                    </a>
+                </div>
             </form>
         </div>
 
@@ -48,7 +50,8 @@
                 </span>
             </div>
 
-            <div class="overflow-x-auto">
+            <!-- Desktop Table (Hidden on mobile) -->
+            <div class="hidden lg:block overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50 border-b border-gray-200">
                         <tr>
@@ -57,7 +60,7 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-600">NIP</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-600">SATKER</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-600">KDPPK</th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-600 w-40">AKSI</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-600 w-32">AKSI</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -68,10 +71,9 @@
                                 <td class="px-4 py-3 text-gray-600">
                                     <code class="bg-gray-100 px-2 py-1 rounded text-xs">{{ $ppk->nip }}</code>
                                 </td>
-                                <td class="px-4 py-3 text-gray-600">{{ $ppk->satker }}</td>
+                                <td class="px-4 py-3 text-gray-600">{{ Str::limit($ppk->satker, 30) }}</td>
                                 <td class="px-4 py-3 text-gray-600">
-                                    <code
-                                        class="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-medium">{{ $ppk->kdppk }}</code>
+                                    <code class="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-medium">{{ $ppk->kdppk }}</code>
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center justify-center gap-2">
@@ -102,12 +104,104 @@
                 </table>
             </div>
 
+            <!-- Mobile Cards (Hidden on desktop) -->
+            <div class="lg:hidden divide-y divide-gray-100">
+                @forelse($ppkData as $index => $ppk)
+                    <div class="p-4">
+                        <div class="flex items-start justify-between mb-2">
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-1">{{ $ppk->nama }}</h4>
+                                <code class="bg-gray-100 px-2 py-0.5 rounded text-xs">{{ $ppk->nip }}</code>
+                            </div>
+                            <span class="text-xs text-gray-400">#{{ $ppkData->firstItem() + $index }}</span>
+                        </div>
+                        
+                        <div class="space-y-1 text-xs text-gray-600 mb-3">
+                            <div>
+                                <span class="text-gray-400">Satker:</span>
+                                <p class="font-medium text-gray-700">{{ $ppk->satker }}</p>
+                            </div>
+                            <div>
+                                <span class="text-gray-400">KDPPK:</span>
+                                <code class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs font-medium ml-1">{{ $ppk->kdppk }}</code>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <a href="{{ route('master.ppk.edit', $ppk->id) }}"
+                                class="flex-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 text-xs font-medium text-center">
+                                Edit
+                            </a>
+                            <form action="{{ route('master.ppk.destroy', $ppk->id) }}" method="POST" class="flex-1"
+                                onsubmit="return confirm('Yakin hapus PPK ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                    class="w-full px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 text-xs font-medium">
+                                    Hapus
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-8 text-center text-gray-500">
+                        Belum ada data PPK
+                    </div>
+                @endforelse
+            </div>
+
             <!-- Pagination -->
-            @if($ppkData->hasPages())
-                <div class="px-4 py-3 border-t border-gray-200">
-                    {{ $ppkData->links() }}
+            <div class="px-4 py-3 border-t border-gray-200">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div class="text-sm text-gray-600 text-center sm:text-left">
+                        Menampilkan <span class="font-medium">{{ $ppkData->firstItem() ?? 0 }}</span> 
+                        - <span class="font-medium">{{ $ppkData->lastItem() ?? 0 }}</span> 
+                        dari <span class="font-medium">{{ $ppkData->total() }}</span> data
+                    </div>
+                    @if($ppkData->hasPages())
+                        <div class="flex items-center justify-center gap-1 sm:gap-2 flex-wrap">
+                            @if($ppkData->onFirstPage())
+                                <span class="px-2 sm:px-3 py-1 text-gray-400 bg-gray-100 rounded text-xs sm:text-sm cursor-not-allowed">←</span>
+                            @else
+                                <a href="{{ $ppkData->previousPageUrl() }}" class="px-2 sm:px-3 py-1 bg-primary text-white rounded text-xs sm:text-sm hover:bg-primary-dark transition">←</a>
+                            @endif
+
+                            @php
+                                $start = max(1, $ppkData->currentPage() - 2);
+                                $end = min($ppkData->lastPage(), $ppkData->currentPage() + 2);
+                            @endphp
+                            
+                            @if($start > 1)
+                                <a href="{{ $ppkData->url(1) }}" class="px-2 sm:px-3 py-1 bg-gray-100 text-gray-700 rounded text-xs sm:text-sm hover:bg-gray-200 transition">1</a>
+                                @if($start > 2)
+                                    <span class="px-1 text-gray-400">...</span>
+                                @endif
+                            @endif
+
+                            @for($page = $start; $page <= $end; $page++)
+                                @if($page == $ppkData->currentPage())
+                                    <span class="px-2 sm:px-3 py-1 bg-primary text-white rounded text-xs sm:text-sm font-medium">{{ $page }}</span>
+                                @else
+                                    <a href="{{ $ppkData->url($page) }}" class="px-2 sm:px-3 py-1 bg-gray-100 text-gray-700 rounded text-xs sm:text-sm hover:bg-gray-200 transition">{{ $page }}</a>
+                                @endif
+                            @endfor
+
+                            @if($end < $ppkData->lastPage())
+                                @if($end < $ppkData->lastPage() - 1)
+                                    <span class="px-1 text-gray-400">...</span>
+                                @endif
+                                <a href="{{ $ppkData->url($ppkData->lastPage()) }}" class="px-2 sm:px-3 py-1 bg-gray-100 text-gray-700 rounded text-xs sm:text-sm hover:bg-gray-200 transition">{{ $ppkData->lastPage() }}</a>
+                            @endif
+
+                            @if($ppkData->hasMorePages())
+                                <a href="{{ $ppkData->nextPageUrl() }}" class="px-2 sm:px-3 py-1 bg-primary text-white rounded text-xs sm:text-sm hover:bg-primary-dark transition">→</a>
+                            @else
+                                <span class="px-2 sm:px-3 py-1 text-gray-400 bg-gray-100 rounded text-xs sm:text-sm cursor-not-allowed">→</span>
+                            @endif
+                        </div>
+                    @endif
                 </div>
-            @endif
+            </div>
         </div>
     </div>
 @endsection

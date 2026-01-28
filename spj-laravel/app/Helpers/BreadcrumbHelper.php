@@ -35,7 +35,7 @@ class BreadcrumbHelper
                     'ppk' => ['label' => 'PPK', 'url' => route('master.ppk.index')],
                     'bendahara' => ['label' => 'Bendahara', 'url' => route('master.bendahara.index')],
                     'sbm-konsumsi' => ['label' => 'SBM Konsumsi', 'url' => route('master.sbm-konsumsi.index')],
-                    'sbm-honorarium' => ['label' => 'SBM Honorarium', 'url' => route('master.sbm-honorarium')],
+                    'sbm-honorarium' => ['label' => 'SBM Honorarium', 'url' => route('master.sbm-honorarium.index')],
                 ];
 
                 if (isset($masterPages[$segments[1]])) {

@@ -61,11 +61,15 @@ Route::prefix('master')->middleware(['auth', 'admin'])->group(function () {
         'destroy' => 'master.sbm-konsumsi.destroy',
     ]);
 
-    // SBM Honorarium Management
-    Route::get('/sbm-honorarium', [SBMHonorariumController::class, 'index'])
-        ->name('master.sbm-honorarium');
-    Route::put('/sbm-honorarium/{id}', [SBMHonorariumController::class, 'update'])
-        ->name('master.sbm-honorarium.update');
+    // SBM Honorarium CRUD
+    Route::resource('sbm-honorarium', SBMHonorariumController::class)->names([
+        'index' => 'master.sbm-honorarium.index',
+        'create' => 'master.sbm-honorarium.create',
+        'store' => 'master.sbm-honorarium.store',
+        'edit' => 'master.sbm-honorarium.edit',
+        'update' => 'master.sbm-honorarium.update',
+        'destroy' => 'master.sbm-honorarium.destroy',
+    ]);
 
     Route::resource('/waktu-konsumsi', App\Http\Controllers\Master\WaktuKonsumsiController::class)
         ->names('master.waktu-konsumsi');

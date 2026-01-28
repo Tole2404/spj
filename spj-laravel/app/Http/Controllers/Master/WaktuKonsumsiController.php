@@ -8,9 +8,21 @@ use Illuminate\Http\Request;
 
 class WaktuKonsumsiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $waktuKonsumsi = WaktuKonsumsi::all();
+        $query = WaktuKonsumsi::query();
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_waktu', 'like', "%{$search}%")
+                    ->orWhere('kode_waktu', 'like', "%{$search}%")
+                    ->orWhere('tipe', 'like', "%{$search}%");
+            });
+        }
+
+        $waktuKonsumsi = $query->orderBy('tipe')->orderBy('kode_waktu')->paginate(10)->withQueryString();
         return view('master.waktu-konsumsi.index', compact('waktuKonsumsi'));
     }
 
@@ -19,12 +31,40 @@ class WaktuKonsumsiController extends Controller
         return view('master.waktu-konsumsi.create');
     }
 
+    /**
+     * Generate kode waktu otomatis berdasarkan tipe
+     * WM01, WM02, ... untuk Makan
+     * WS01, WS02, ... untuk Snack
+     */
+    private function generateKode($tipe)
+    {
+        $prefix = $tipe === 'snack' ? 'WS' : 'WM';
+
+        // Cari kode terakhir dengan prefix ini
+        $lastKode = WaktuKonsumsi::where('kode_waktu', 'like', $prefix . '%')
+            ->orderBy('kode_waktu', 'desc')
+            ->first();
+
+        if ($lastKode) {
+            // Extract angka dari kode terakhir
+            $lastNumber = (int) substr($lastKode->kode_waktu, 2);
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+
+        return $prefix . str_pad($newNumber, 2, '0', STR_PAD_LEFT);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
             'nama_waktu' => 'required|string|max:255',
-            'kode_waktu' => 'required|string|max:20|unique:waktu_konsumsi',
+            'tipe' => 'required|in:makan,snack',
         ]);
+
+        // Auto-generate kode
+        $validated['kode_waktu'] = $this->generateKode($validated['tipe']);
 
         WaktuKonsumsi::create($validated);
 
@@ -44,8 +84,13 @@ class WaktuKonsumsiController extends Controller
 
         $validated = $request->validate([
             'nama_waktu' => 'required|string|max:255',
-            'kode_waktu' => 'required|string|max:20|unique:waktu_konsumsi,kode_waktu,' . $id,
+            'tipe' => 'required|in:makan,snack',
         ]);
+
+        // Jika tipe berubah, generate kode baru
+        if ($validated['tipe'] !== $waktuKonsumsi->tipe) {
+            $validated['kode_waktu'] = $this->generateKode($validated['tipe']);
+        }
 
         $waktuKonsumsi->update($validated);
 

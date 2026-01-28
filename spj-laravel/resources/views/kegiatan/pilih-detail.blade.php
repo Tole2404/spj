@@ -55,11 +55,11 @@
                 <div class="flex items-center gap-2">
                     <span class="text-sm font-semibold text-gray-900">Data Konsumsi</span>
                     <span class="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
-                        {{ $snacks->count() + $makanans->count() }} item
+                        {{ $snacks->count() + $makanans->count() + $barangs->count() }} item
                     </span>
                 </div>
                 <div class="flex items-center gap-2">
-                    @php $hasKonsumsi = $snacks->count() + $makanans->count(); @endphp
+                    @php $hasKonsumsi = $snacks->count() + $makanans->count() + $barangs->count(); @endphp
                     <a href="{{ $hasKonsumsi > 0 ? route('kwitansi.generate', ['kegiatan_id' => $kegiatan->id, 'jenis' => 'UP', 'type' => 'konsumsi']) : '#' }}"
                         class="px-2 py-1 text-xs font-medium rounded transition {{ $hasKonsumsi > 0 ? 'bg-primary text-white hover:bg-primary-dark' : 'bg-gray-100 text-gray-400 cursor-not-allowed' }}"
                         @if($hasKonsumsi == 0) onclick="event.preventDefault(); alert('Belum ada data konsumsi');" @endif>
@@ -77,7 +77,7 @@
                 </div>
             </div>
 
-            @if($snacks->count() > 0 || $makanans->count() > 0)
+            @if($snacks->count() > 0 || $makanans->count() > 0 || $barangs->count() > 0)
                 <div class="divide-y divide-gray-100">
                     <!-- Snack -->
                     @if($snacks->count() > 0)
@@ -175,6 +175,52 @@
                                         <td colspan="5" class="px-2 py-1.5 text-right font-semibold">Total:</td>
                                         <td class="px-2 py-1.5 text-right font-bold text-primary">Rp
                                             {{ number_format($totalMakanan, 0, ',', '.') }}</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    @endif
+
+                    <!-- Barang -->
+                    @if($barangs->count() > 0)
+                        <div class="p-3">
+                            <div class="text-xs font-semibold text-gray-500 uppercase mb-1.5">Barang ({{ $barangs->count() }})</div>
+                            <table class="w-full text-xs">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-2 py-1.5 text-left font-medium text-gray-600">Nama</th>
+                                        <th class="px-2 py-1.5 text-left font-medium text-gray-600 w-24">No Kwitansi</th>
+                                        <th class="px-2 py-1.5 text-left font-medium text-gray-600 w-28">Tgl Pembelian</th>
+                                        <th class="px-2 py-1.5 text-center font-medium text-gray-600 w-12">Qty</th>
+                                        <th class="px-2 py-1.5 text-right font-medium text-gray-600 w-20">Harga</th>
+                                        <th class="px-2 py-1.5 text-right font-medium text-gray-600 w-24">Subtotal</th>
+                                        <th class="px-2 py-1.5 text-center font-medium text-gray-600 w-16">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-50">
+                                    @foreach($barangs as $item)
+                                        <tr>
+                                            <td class="px-2 py-1.5">{{ $item->nama_konsumsi }}</td>
+                                            <td class="px-2 py-1.5 text-xs text-gray-600">{{ $item->no_kwitansi ?? '-' }}</td>
+                                            <td class="px-2 py-1.5 text-xs text-gray-600">{{ $item->tanggal_pembelian ? \Carbon\Carbon::parse($item->tanggal_pembelian)->format('d/m/Y') : '-' }}</td>
+                                            <td class="px-2 py-1.5 text-center">{{ $item->jumlah }}</td>
+                                            <td class="px-2 py-1.5 text-right">Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
+                                            <td class="px-2 py-1.5 text-right font-medium">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                                            <td class="px-2 py-1.5 text-center">
+                                                <form action="{{ route('konsumsi.destroy', $item->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus item ini?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-800 text-xs font-medium">✕</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot class="bg-gray-50 border-t border-gray-200">
+                                    <tr>
+                                        <td colspan="5" class="px-2 py-1.5 text-right font-semibold">Total:</td>
+                                        <td class="px-2 py-1.5 text-right font-bold text-primary">Rp {{ number_format($totalBarang, 0, ',', '.') }}</td>
                                         <td></td>
                                     </tr>
                                 </tfoot>

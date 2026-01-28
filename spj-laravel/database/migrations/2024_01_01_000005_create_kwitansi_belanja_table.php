@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('kwitansi_belanja', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_kegiatan')->nullable()->constrained('kegiatan')->onDelete('cascade');
+            $table->foreignId('id_kegiatan')->nullable()->constrained('kegiatans')->onDelete('cascade');
             $table->string('nomor_kwitansi');
             $table->integer('jumlah')->nullable();
             $table->integer('harga')->nullable();

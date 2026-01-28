@@ -61,6 +61,7 @@ class KegiatanController extends Controller
     {
         $validated = $request->validate([
             'nama_kegiatan' => 'required|string|max:255',
+            'uraian_kegiatan' => 'nullable|string',
             'unor_id' => 'required|exists:unors,id',
             'unit_kerja_id' => 'required|exists:unit_kerjas,id',
             'mak_id' => 'required|exists:mak,id',
@@ -111,37 +112,50 @@ class KegiatanController extends Controller
             ->where('kategori', 'makanan')
             ->where('status', '!=', 'draft')
             ->get();
+        $barangs = \App\Models\Konsumsi::where('kegiatan_id', $id)
+            ->where('kategori', 'barang')
+            ->where('status', '!=', 'draft')
+            ->get();
 
-        // Get narasumber
-        $narasumbers = \App\Models\Narasumber::where('kegiatan_id', $id)->get();
+        // Get narasumber (exclude drafts)
+        $narasumbers = \App\Models\Narasumber::where('kegiatan_id', $id)
+            ->where('status', '!=', 'draft')
+            ->get();
 
         // Calculate totals
         $totalSnack = $snacks->sum(fn($item) => $item->jumlah * $item->harga);
         $totalMakanan = $makanans->sum(fn($item) => $item->jumlah * $item->harga);
+        $totalBarang = $barangs->sum(fn($item) => $item->jumlah * $item->harga);
         $totalHonorarium = $narasumbers->sum('honorarium_netto');
-        $grandTotal = $totalSnack + $totalMakanan + $totalHonorarium;
+        $grandTotal = $totalSnack + $totalMakanan + $totalBarang + $totalHonorarium;
 
         return view('kegiatan.pilih-detail', compact(
             'kegiatan',
             'snacks',
             'makanans',
+            'barangs',
             'narasumbers',
             'totalSnack',
             'totalMakanan',
+            'totalBarang',
             'totalHonorarium',
             'grandTotal'
         ));
     }
-
     /**
      * Show the form for editing the specified kegiatan.
      */
     public function edit(string $id)
     {
         $kegiatan = Kegiatan::findOrFail($id);
-        $unor = Unor::all();
-        $unitKerja = UnitKerja::all();
-        return view('kegiatan.edit', compact('kegiatan', 'unor', 'unitKerja'));
+        $unors = Unor::all();
+        $unitKerjas = UnitKerja::all();
+        $makData = \App\Models\MAK::orderBy('tahun', 'desc')->orderBy('nama')->get();
+        $ppkData = \App\Models\PPK::orderBy('nama')->get();
+        $bendaharaData = \App\Models\Bendahara::where('is_active', true)->orderBy('nama')->get();
+        $provinsiData = \App\Models\SatuanBiayaKonsumsiProvinsi::orderBy('nama_provinsi')->get();
+
+        return view('kegiatan.edit', compact('kegiatan', 'unors', 'unitKerjas', 'makData', 'ppkData', 'bendaharaData', 'provinsiData'));
     }
 
     /**
@@ -153,21 +167,28 @@ class KegiatanController extends Controller
 
         $validated = $request->validate([
             'nama_kegiatan' => 'required|string|max:255',
-            'id_unor' => 'nullable|exists:unor,id',
-            'id_unit' => 'nullable|exists:unit_kerja,id',
-            'tanggal_kegiatan' => 'nullable|date',
-            'tanggal_berakhir' => 'nullable|date',
-            'file_laporan_kegiatan' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
+            'uraian_kegiatan' => 'nullable|string',
+            'unor_id' => 'required|exists:unors,id',
+            'unit_kerja_id' => 'required|exists:unit_kerjas,id',
+            'mak_id' => 'required|exists:mak,id',
+            'ppk_id' => 'required|exists:ppk,id',
+            'bendahara_id' => 'nullable|exists:bendaharas,id',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date',
+            'jumlah_peserta' => 'required|integer|min:1',
+            'provinsi_id' => 'required|exists:satuan_biaya_konsumsi_provinsi,id',
+            'detail_lokasi' => 'required|string|max:255',
+            'file_laporan' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
         ]);
 
-        if ($request->hasFile('file_laporan_kegiatan')) {
-            $validated['file_laporan_kegiatan'] = $request->file('file_laporan_kegiatan')
+        if ($request->hasFile('file_laporan')) {
+            $validated['file_laporan'] = $request->file('file_laporan')
                 ->store('laporan_kegiatan', 'public');
         }
 
         $kegiatan->update($validated);
 
-        return redirect()->route('kegiatan.show', $kegiatan->id)
+        return redirect()->route('kegiatan.index')
             ->with('success', 'Kegiatan berhasil diupdate!');
     }
 

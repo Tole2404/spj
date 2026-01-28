@@ -55,7 +55,11 @@ class KonsumsiController extends Controller
         \Log::info('Konsumsi Store Request:', $request->all());
 
         // Determine status (draft or final)
-        $status = $request->input('save_as_draft') ? 'draft' : 'final';
+        // Note: save_as_draft comes as "0" or "1" from form buttons
+        $saveAsDraft = $request->input('save_as_draft');
+        $status = ($saveAsDraft === '1' || $saveAsDraft === 1) ? 'draft' : 'final';
+
+        \Log::info("Save as draft value: " . var_export($saveAsDraft, true) . " - Status: {$status}");
 
         // Delete existing draft data
         // - If saving as draft: replace old draft with new one

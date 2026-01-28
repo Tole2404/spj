@@ -19,59 +19,104 @@ class NarasumberController extends Controller
         // Load all SBM Honorarium tarif
         $sbmHonorarium = SBMHonorariumNarasumber::orderBy('tarif_honorarium', 'desc')->get();
 
-        return view('narasumber.create', compact('kegiatan', 'sbmHonorarium'));
+        // Load draft data if exists
+        $draftData = Narasumber::where('kegiatan_id', $kegiatan_id)
+            ->where('status', 'draft')
+            ->get();
+
+        // Check if there's any draft
+        $hasDraft = $draftData->count() > 0;
+
+        return view('narasumber.create', compact('kegiatan', 'sbmHonorarium', 'draftData', 'hasDraft'));
     }
 
     /**
      * Store narasumber with SBM validation & PPh21 calculation
+     * Supports multiple narasumber submission
      */
     public function store(Request $request)
     {
-        // Validation
+        // Determine status (draft or final)
+        $saveAsDraft = $request->input('save_as_draft');
+        $status = ($saveAsDraft === '1' || $saveAsDraft === 1) ? 'draft' : 'final';
+
+        \Log::info("Narasumber save - Draft: " . var_export($saveAsDraft, true) . " - Status: {$status}");
+
+        // Validation for multiple narasumber
         $validated = $request->validate([
             'kegiatan_id' => 'required|exists:kegiatans,id',
-            'nama_narasumber' => 'required|string|max:255',
-            'jenis' => 'required|in:narasumber,moderator,pembawa_acara,panitia',
-            'golongan_jabatan' => 'required|string',
-            'npwp' => 'required|string|max:20',
-            'tarif_pph21' => 'required|in:0,5,6,15',
-            'honorarium_bruto' => 'required|integer|min:0',
+            'narasumber' => 'required|array|min:1',
+            'narasumber.*.jenis' => 'required|in:narasumber,moderator,pembawa_acara,panitia',
+            'narasumber.*.golongan_jabatan' => 'required|string',
+            'narasumber.*.nama_narasumber' => 'required|string|max:255',
+            'narasumber.*.npwp' => 'required|string|max:20',
+            'narasumber.*.tarif_pph21' => 'required|in:0,5,6,15',
+            'narasumber.*.honorarium_bruto' => 'required|integer|min:0',
         ]);
 
-        // Get SBM tarif for validation
-        $sbm = SBMHonorariumNarasumber::where('golongan_jabatan', $validated['golongan_jabatan'])->first();
+        $kegiatan_id = $validated['kegiatan_id'];
 
-        if (!$sbm) {
-            return back()->withErrors(['golongan_jabatan' => 'Golongan jabatan tidak valid.'])->withInput();
+        // Delete existing draft data before saving new
+        Narasumber::where('kegiatan_id', $kegiatan_id)
+            ->where('status', 'draft')
+            ->delete();
+
+        $savedCount = 0;
+        $errors = [];
+
+        foreach ($request->narasumber as $index => $item) {
+            // Skip empty entries
+            if (empty($item['nama_narasumber'])) {
+                continue;
+            }
+
+            // Get SBM tarif for validation
+            $sbm = SBMHonorariumNarasumber::where('golongan_jabatan', $item['golongan_jabatan'])->first();
+
+            if (!$sbm) {
+                $errors[] = "Narasumber #{$index}: Golongan jabatan tidak valid.";
+                continue;
+            }
+
+            // HARD VALIDATION: Honorarium bruto TIDAK BOLEH > tarif SBM
+            if ($item['honorarium_bruto'] > $sbm->tarif_honorarium) {
+                $errors[] = "Narasumber '{$item['nama_narasumber']}': Honorarium melebihi SBM (Max: Rp " . number_format($sbm->tarif_honorarium, 0, ',', '.') . ")";
+                continue;
+            }
+
+            // Calculate PPh21
+            $tarif_persen = (int) $item['tarif_pph21'];
+            $pph21 = ($item['honorarium_bruto'] * $tarif_persen) / 100;
+            $honorarium_netto = $item['honorarium_bruto'] - $pph21;
+
+            // Save narasumber with status
+            Narasumber::create([
+                'kegiatan_id' => $kegiatan_id,
+                'nama_narasumber' => $item['nama_narasumber'],
+                'jenis' => $item['jenis'],
+                'golongan_jabatan' => $item['golongan_jabatan'],
+                'npwp' => $item['npwp'],
+                'tarif_pph21' => $item['tarif_pph21'],
+                'honorarium_bruto' => $item['honorarium_bruto'],
+                'pph21' => $pph21,
+                'honorarium_netto' => $honorarium_netto,
+                'status' => $status,
+            ]);
+            $savedCount++;
         }
 
-        // HARD VALIDATION: Honorarium bruto TIDAK BOLEH > tarif SBM
-        if ($validated['honorarium_bruto'] > $sbm->tarif_honorarium) {
-            return back()->withErrors([
-                'honorarium_bruto' => 'Honorarium tidak boleh melebihi tarif SBM: Rp ' . number_format($sbm->tarif_honorarium, 0, ',', '.')
-            ])->withInput();
+        if ($savedCount === 0) {
+            return back()->withErrors(['narasumber' => 'Tidak ada narasumber yang berhasil disimpan. ' . implode(' ', $errors)])->withInput();
         }
 
-        // Calculate PPh21
-        $tarif_persen = (int) $validated['tarif_pph21'];
-        $pph21 = ($validated['honorarium_bruto'] * $tarif_persen) / 100;
-        $honorarium_netto = $validated['honorarium_bruto'] - $pph21;
+        $statusMessage = $status === 'draft' ? 'draft' : 'final dan siap divalidasi';
+        $message = "Berhasil menyimpan {$savedCount} narasumber sebagai {$statusMessage}.";
+        if (!empty($errors)) {
+            $message .= " Beberapa item tidak tersimpan: " . implode('; ', $errors);
+        }
 
-        // Save narasumber
-        Narasumber::create([
-            'kegiatan_id' => $validated['kegiatan_id'],
-            'nama_narasumber' => $validated['nama_narasumber'],
-            'jenis' => $validated['jenis'],
-            'golongan_jabatan' => $validated['golongan_jabatan'],
-            'npwp' => $validated['npwp'],
-            'tarif_pph21' => $validated['tarif_pph21'],
-            'honorarium_bruto' => $validated['honorarium_bruto'],
-            'pph21' => $pph21,
-            'honorarium_netto' => $honorarium_netto,
-        ]);
-
-        return redirect()->route('kegiatan.pilih-detail', $validated['kegiatan_id'])
-            ->with('success', 'Narasumber berhasil ditambahkan');
+        return redirect()->route('kegiatan.pilih-detail', $kegiatan_id)
+            ->with('success', $message);
     }
 
     /**

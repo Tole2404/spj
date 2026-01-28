@@ -18,6 +18,7 @@ class Kegiatan extends Model
         'ppk_id',
         'bendahara_id',
         'nama_kegiatan',
+        'uraian_kegiatan',
         'tanggal_mulai',
         'tanggal_selesai',
         'jumlah_peserta',

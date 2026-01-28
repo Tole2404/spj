@@ -22,12 +22,33 @@ class PPKSeeder extends Seeder
                 'satker' => 'SEKRETARIAT BADAN PENGEMBANGAN SUMBER DAYA MANUSIA',
                 'kdppk' => '01',
             ],
+            [
+                'nama' => 'Dr. Ir. Bambang Supriyanto, M.T.',
+                'nip' => '196512101990031003',
+                'satker' => 'PUSAT PENDIDIKAN DAN PELATIHAN',
+                'kdppk' => '03',
+            ],
+            [
+                'nama' => 'Drs. Hendra Kusuma, M.M.',
+                'nip' => '197001151995121001',
+                'satker' => 'PUSAT PENELITIAN DAN PENGEMBANGAN',
+                'kdppk' => '04',
+            ],
+            [
+                'nama' => 'Dr. Sri Wahyuni, S.T., M.Eng.',
+                'nip' => '197508202000032001',
+                'satker' => 'BALAI BESAR PENGEMBANGAN TEKNOLOGI',
+                'kdppk' => '05',
+            ],
         ];
 
         foreach ($ppkData as $ppk) {
-            PPK::create($ppk);
+            PPK::updateOrCreate(
+                ['nip' => $ppk['nip']],
+                $ppk
+            );
         }
 
-        $this->command->info('PPK seeder completed! ' . count($ppkData) . ' records created.');
+        $this->command->info('PPK seeder completed! ' . count($ppkData) . ' records created/updated.');
     }
 }

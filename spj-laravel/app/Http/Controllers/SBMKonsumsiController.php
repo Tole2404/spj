@@ -7,9 +7,17 @@ use Illuminate\Http\Request;
 
 class SBMKonsumsiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $sbm = SatuanBiayaKonsumsiProvinsi::orderBy('id_provinsi')->get();
+        $query = SatuanBiayaKonsumsiProvinsi::query();
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('nama_provinsi', 'like', "%{$search}%");
+        }
+
+        $sbm = $query->orderBy('id_provinsi')->paginate(15)->withQueryString();
         return view('master.sbm-konsumsi.index', compact('sbm'));
     }
 
@@ -21,7 +29,6 @@ class SBMKonsumsiController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'id_provinsi' => 'required|integer',
             'nama_provinsi' => 'required|string|max:255',
             'satuan' => 'required|string|max:50',
             'harga_max_makan' => 'required|integer|min:0',
@@ -46,7 +53,6 @@ class SBMKonsumsiController extends Controller
         $sbm = SatuanBiayaKonsumsiProvinsi::findOrFail($id);
 
         $validated = $request->validate([
-            'id_provinsi' => 'required|integer',
             'nama_provinsi' => 'required|string|max:255',
             'satuan' => 'required|string|max:50',
             'harga_max_makan' => 'required|integer|min:0',
@@ -69,4 +75,3 @@ class SBMKonsumsiController extends Controller
             ->with('success', 'Data SBM Konsumsi berhasil dihapus!');
     }
 }
-

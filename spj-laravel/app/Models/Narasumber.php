@@ -21,6 +21,7 @@ class Narasumber extends Model
         'honorarium_bruto',
         'pph21',
         'honorarium_netto',
+        'status',
     ];
 
     protected $casts = [

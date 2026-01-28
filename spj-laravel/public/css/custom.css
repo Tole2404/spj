@@ -4,7 +4,7 @@
 
 :root {
     /* Primary Colors (Teal/Hijau) */
-    --color-primary: #14b8a6;
+    --color-primary: #00e508;
     --color-primary-dark: #0f766e;
     --color-primary-light: #2dd4bf;
 
@@ -275,4 +275,53 @@ body {
 
 .border-primary {
     border-color: var(--color-primary) !important;
+}
+
+/* ========================================
+   Inline Loader (for tables/sections)
+   ======================================== */
+
+.inline-loader {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.85);
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: var(--radius-lg);
+}
+
+.inline-loader.active {
+    display: flex;
+}
+
+.inline-loader .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--color-gray-200);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+.inline-loader .spinner-text {
+    margin-left: 0.75rem;
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Container untuk inline loader */
+.loader-container {
+    position: relative;
 }

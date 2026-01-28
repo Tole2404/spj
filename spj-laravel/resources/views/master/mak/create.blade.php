@@ -5,84 +5,107 @@
 @section('page-subtitle', 'Form tambah data MAK baru')
 
 @section('content')
-    <div class="max-w-3xl">
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <form action="{{ route('master.mak.store') }}" method="POST">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white rounded-lg border border-gray-200">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+                <h3 class="font-semibold text-gray-900">Form Tambah MAK</h3>
+            </div>
+
+            <form action="{{ route('master.mak.store') }}" method="POST" class="p-4 sm:p-6 space-y-4">
                 @csrf
 
-                <!-- Tahun -->
-                <div class="mb-4">
-                    <label class="form-label">Tahun <span class="text-red-500">*</span></label>
-                    <input type="number" name="tahun" value="{{ old('tahun', date('Y')) }}" required
-                        class="form-input @error('tahun') border-red-500 @enderror" min="2020" max="2100">
-                    @error('tahun')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+                <!-- Tahun & Kode Row -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Tahun -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Tahun <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" name="tahun" value="{{ old('tahun', date('Y')) }}" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary @error('tahun') border-red-500 @enderror"
+                            min="2020" max="2100">
+                        @error('tahun')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
 
-                <!-- Kode -->
-                <div class="mb-4">
-                    <label class="form-label">Kode <span class="text-red-500">*</span></label>
-                    <input type="text" name="kode" value="{{ old('kode') }}" required
-                        class="form-input @error('kode') border-red-500 @enderror"
-                        placeholder="Contoh: 12.694431.WA.7770.EBD.Z24.100.A-524111">
-                    @error('kode')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
+                    <!-- Kode -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Kode <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="kode" value="{{ old('kode') }}" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary @error('kode') border-red-500 @enderror"
+                            placeholder="12.694431.WA.7770.EBD...">
+                        @error('kode')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
                 <!-- Nama -->
-                <div class="mb-4">
-                    <label class="form-label">Nama <span class="text-red-500">*</span></label>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Nama <span class="text-red-500">*</span>
+                    </label>
                     <input type="text" name="nama" value="{{ old('nama') }}" required
-                        class="form-input @error('nama') border-red-500 @enderror"
-                        placeholder="Contoh: Evaluasi Pelaksanaan Kegiatan - Belanja Perjalanan Dinas Biasa">
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary @error('nama') border-red-500 @enderror"
+                        placeholder="Evaluasi Pelaksanaan Kegiatan - Belanja Perjalanan Dinas Biasa">
                     @error('nama')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <!-- Satker -->
-                <div class="mb-4">
-                    <label class="form-label">Satker <span class="text-red-500">*</span></label>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Satker <span class="text-red-500">*</span>
+                    </label>
                     <input type="text" name="satker" value="{{ old('satker') }}" required
-                        class="form-input @error('satker') border-red-500 @enderror"
-                        placeholder="Contoh: SEKRETARIAT BADAN PENGEMBANGAN SUMBER DAYA MANUSIA">
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary @error('satker') border-red-500 @enderror"
+                        placeholder="SEKRETARIAT BADAN PENGEMBANGAN SUMBER DAYA MANUSIA">
                     @error('satker')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <!-- Akun -->
-                <div class="mb-4">
-                    <label class="form-label">Akun <span class="text-red-500">*</span></label>
-                    <input type="text" name="akun" value="{{ old('akun') }}" required
-                        class="form-input @error('akun') border-red-500 @enderror"
-                        placeholder="Contoh: Belanja Perjalanan Dinas Biasa">
-                    @error('akun')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+                <!-- Akun & Paket Row -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Akun -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Akun <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="akun" value="{{ old('akun') }}" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary @error('akun') border-red-500 @enderror"
+                            placeholder="Belanja Perjalanan Dinas Biasa">
+                        @error('akun')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
 
-                <!-- Paket -->
-                <div class="mb-4">
-                    <label class="form-label">Paket <span class="text-red-500">*</span></label>
-                    <input type="text" name="paket" value="{{ old('paket') }}" required
-                        class="form-input @error('paket') border-red-500 @enderror"
-                        placeholder="Contoh: Evaluasi Pelaksanaan Kegiatan">
-                    @error('paket')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
+                    <!-- Paket -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Paket <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="paket" value="{{ old('paket') }}" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary @error('paket') border-red-500 @enderror"
+                            placeholder="Evaluasi Pelaksanaan Kegiatan">
+                        @error('paket')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
                 <!-- Actions -->
-                <div class="flex items-center gap-3 pt-4 border-t border-gray-200">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-4 border-t border-gray-200">
                     <button type="submit"
-                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition">
+                        class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition font-medium text-center">
                         Simpan MAK
                     </button>
                     <a href="{{ route('master.mak.index') }}"
-                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+                        class="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-center">
                         Batal
                     </a>
                 </div>
