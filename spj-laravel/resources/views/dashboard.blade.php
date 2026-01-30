@@ -218,11 +218,7 @@
                 // Redirect to kegiatan detail
                 window.location.href = '/daftar-kegiatan/' + info.event.id + '/pilih-detail';
             },
-            eventTimeFormat: {
-                hour: '2-digit',
-                minute: '2-digit',
-                meridiem: false
-            }
+            displayEventTime: false
         });
         calendar.render();
     });
